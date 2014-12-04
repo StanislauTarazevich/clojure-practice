@@ -5,6 +5,15 @@
   (:use cmeans.algorithm)
   (:use cmeans.distances))
 
+(defn- determine-distance
+	[function-name]
+	(case function-name
+		"hamming" hamming-distance,
+		"euclid" euclid-distance))
+
 (defn -main
   [& args]
-  (find-clusters (get-collection-from-file "testdata/glass.txt"), euclid-distance))
+  (let [path (first args)
+        distance-fn (determine-distance (last args))]
+  (doseq [center (find-clusters (get-collection-from-file path), distance-fn)]
+    (println center))))

@@ -9,10 +9,10 @@
 (def rb (* 1.5 ra))
 (def alpha (/ 4 (* ra ra)))
 (def beta (/ 4 (* rb rb)))
-(def eps-l 0.01)
+(def eps-l 0.15)
 (def eps-h 0.5)
 
-(get-collection-from-file "testdata/glass.txt")
+(get-collection-from-file "testdata/bezdekIris.data")
 
 (defn- calc-distance
   [a, b, distance-fn]
@@ -20,39 +20,31 @@
 
 (defn- calc-init-potential
   [point, collection, distance-fn]
-  (reduce + (map (fn [elem] (Math/exp (- (* (Math/pow (calc-distance elem point distance-fn) 2) alpha)))) collection)))
+  (reduce + (map (fn [elem] (Math/exp (- (* (calc-distance elem point distance-fn) alpha)))) collection)))
 
-(defn calc-init-potentials
+(defn- calc-init-potentials
   [collection, distance-fn]
   (map (fn [elem] (struct-map point :index (:index elem) :coords (:coords elem) :potential (calc-init-potential elem collection distance-fn))) collection))
 
-(calc-init-potentials (get-collection-from-file "testdata/glass.txt") euclid-distance)
-
 (defn- calc-next-potential
   [point, curr-center, distance-fn]
-  (- (:potential point) (* (:potential curr-center) (Math/exp (- (* (Math/pow (calc-distance point curr-center distance-fn) 2) beta))))))
+  (- (:potential point) (* (:potential curr-center) (Math/exp (- (* (calc-distance point curr-center distance-fn) beta))))))
 
 (defn- calc-next-potentials
   [collection, curr-center, distance-fn]
   (map (fn [elem] (struct-map point :index (:index elem) :coords (:coords elem) :potential (calc-next-potential elem curr-center distance-fn))) collection))
 
-(defn get-max-potential-point
+(defn- get-max-potential-point
   [collection]
   (apply max-key (fn [x] (:potential x)) collection))
-
-(get-max-potential-point '({:potential 100} {:potential 200}))
 
 (defn- min-distance
   [point centers distance-fn]
   (apply min (map #(calc-distance point %1 distance-fn) centers)))
 
-(min-distance {:coords '(1 2 3 4)}, [{:coords '(1 2 3 5)} {:coords '(1 2 3 5)} {:coords '(1 2 3 5)}] euclid-distance)
-
 (defn- potential-to-zero
   [points index]
   (map #(if (= (:index %1) index) (assoc %1 :potential 0) %1) points))
-
-(potential-to-zero '({:index 1 :potential 100} {:index 2 :potential 200}) 1)
 
 (defn- add-center
   [collection centers first-center new-center distance-fn]
@@ -69,7 +61,6 @@
   [centers collection first-center distance-fn]
   (let [new-collection (calc-next-potentials collection (first centers) distance-fn)
         new-center (get-max-potential-point new-collection)]
-    (println new-center)
     (add-center new-collection centers first-center new-center distance-fn)))
 
 (defn find-clusters
