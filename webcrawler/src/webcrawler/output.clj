@@ -22,7 +22,6 @@
   	(let [str-indent (calculate-indent (* 3 inv-depth))]
    		(println str-indent (generate-node-info p-node))))
 
-
 (defn print-nodes
 	[p-node, depth]
   (if (> depth 0)
