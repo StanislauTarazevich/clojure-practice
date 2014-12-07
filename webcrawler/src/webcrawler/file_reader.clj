@@ -10,7 +10,6 @@
     	(let [lines (line-seq reader)]
             (doall (map #(to-list %, delimiter) lines)))))
 
-
 (defn retrieve-lines [path]
   	(with-open [reader (io/reader path)]
     	(doall (line-seq reader))))

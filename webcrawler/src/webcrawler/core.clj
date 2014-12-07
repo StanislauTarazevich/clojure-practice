@@ -10,8 +10,10 @@
 
 (defn -main
   [& args]
-  (let [url (first args)
+  (let [path (first args)
         depth (read-string (last args))
-        start-urls (get-urls-to-start url)
-        root (create-root-node start-urls depth)]
-    (print-nodes (crawl-node root (:depth root)) 0)))
+        start-urls (get-urls-to-start path)
+        root (create-root-node start-urls depth)
+        crawled-root (crawl-node nil root (:depth root))]
+    (shutdown-agents)
+    (print-nodes crawled-root 0)))

@@ -26,5 +26,5 @@
 	[p-node, depth]
   (if (> depth 0)
 	  (print-node p-node depth))
-	(doseq [child-node (:children p-node)]
+	(doseq [child-node @(:children p-node)]
 		(print-nodes child-node (inc depth))))

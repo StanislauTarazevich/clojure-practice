@@ -4,6 +4,8 @@
   (:require [webcrawler.models])
   (:import [webcrawler.models Webpage]))
 
+(def not-nil? (complement nil?))
+
 (def http-client-options
     { :max-redirects 1
 	  :socket-timeout 5000
@@ -26,25 +28,26 @@
     (let [snippets (html/html-snippet body)
           hrefs (convert-to-base (exclude-self-refs (remove-nils (map #(:href (:attrs %1)) (html/select snippets #{ [:a] }))), url))]
     	(if (nil? hrefs)
-    		[]
+    	  []
     		hrefs)))
 
 (defn create-root-node
   [urls depth]
-  (Webpage. "root" 0 nil depth urls '()))
+  (Webpage. "root" 0 nil depth urls (atom [])))
 
 (defn fetch-page
   [url depth]
   (try
     (let [content (client/get url http-client-options)
           body (:body content)]
-      (Webpage. url (:status content) body depth (get-hrefs body url) '()))
-    (catch Exception e (Webpage. url 404 nil 0 '() '()))))
+      (Webpage. url (:status content) body depth (get-hrefs body url) (atom [])))
+    (catch Exception e (Webpage. url 404 nil 0 '() (atom [])))))
 
 (defn crawl-node
-  [node curr-depth]
+  [parent node curr-depth]
+  (if (not-nil? parent)
+    (swap! (:children parent) conj node))
   (let [new-depth (dec curr-depth)]
     (if (>= new-depth 0)
-      (let [children (map (fn [elem] (crawl-node (fetch-page elem new-depth) new-depth)) (:urls node))]
-        (assoc node :children children))
-      node)))
+      (doall (pmap (fn [elem] (crawl-node node (fetch-page elem new-depth) new-depth)) (:urls node))))
+    node))
