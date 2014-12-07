@@ -11,6 +11,20 @@
 	  :socket-timeout 5000
 	  :conn-timeout 5000 } )
 
+(defn determine-status
+	[content]
+	(let [status (:status content)]
+	 	(if (nil? status)
+	 		404
+	 		status)))
+
+(defn get-redirect-info
+	[content]
+	(let [status (determine-status content)]
+    (if (boolean (some #(= status %) '(301 302)))
+      (:location (:headers content))
+      nil)))
+
 (defn remove-nils
 	[hrefs]
 	(filter #(not (nil? %)), hrefs))
@@ -33,15 +47,15 @@
 
 (defn create-root-node
   [urls depth]
-  (Webpage. "root" 0 nil depth urls (atom [])))
+  (Webpage. "root" 0 nil depth urls (atom []) nil))
 
 (defn fetch-page
   [url depth]
   (try
     (let [content (client/get url http-client-options)
           body (:body content)]
-      (Webpage. url (:status content) body depth (get-hrefs body url) (atom [])))
-    (catch Exception e (Webpage. url 404 nil 0 '() (atom [])))))
+      (Webpage. url (:status content) body depth (get-hrefs body url) (atom []) (get-redirect-info content)))
+    (catch Exception e (Webpage. url 404 nil 0 '() (atom []) nil))))
 
 (defn crawl-node
   [parent node curr-depth]

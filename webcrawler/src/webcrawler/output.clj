@@ -9,7 +9,7 @@
 	(case (:status p-node)
 		200 ""
 		404 " bad"
-		(301 302) " redirected"))
+		(301 302) (str " redirect -> ", (:redirect-info p-node))))
 
 (defn- generate-node-info
 	[p-node]
