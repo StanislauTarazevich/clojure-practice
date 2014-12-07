@@ -12,8 +12,6 @@
 (def eps-l 0.15)
 (def eps-h 0.5)
 
-(get-collection-from-file "testdata/bezdekIris.data")
-
 (defn- calc-distance
   [a, b, distance-fn]
   (distance-fn (:coords a) (:coords b)))
