@@ -7,9 +7,7 @@
 (def not-nil? (complement nil?))
 
 (def http-client-options
-    { :max-redirects 1
-	  :socket-timeout 5000
-	  :conn-timeout 5000 } )
+  {:max-redirects 1 :socket-timeout 5000 :conn-timeout 5000})
 
 (defn determine-status
 	[content]
@@ -35,7 +33,7 @@
 
 (defn convert-to-base
 	[hrefs]
-	(distinct (remove-nils (map #(re-find #"http.*\.[a-zA-Z]+/", %), hrefs))))
+	(distinct (remove-nils (map #(re-find #"http.*\.[a-zA-Z]+", %), hrefs))))
 
 (defn get-hrefs
 	[body url]
